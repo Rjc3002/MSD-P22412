@@ -1,9 +1,6 @@
 #pragma once
 #ifndef STEWARTPLATFORM_H_
 #define STEWARTPLATFORM_H_
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #include <iostream>
 #include <vector>
@@ -20,9 +17,4 @@ extern "C" {
 
 
 
-
-
-#ifdef __cplusplus
-}
-#endif
 #endif /* STEWARTPLATFORM_H_ */

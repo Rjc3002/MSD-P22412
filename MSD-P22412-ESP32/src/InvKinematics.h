@@ -6,10 +6,22 @@
 #include <vector>
 #include <cmath>
 #include <array>
+#include <tuple>
 
-
-
-
+class InvKinematics {
+private:
+	double rb, rp, gamma_B, gamma_P; //Platform variables
+	double aNom, aMin, aMax, height; //Actuator variables
+	std::array<std::array<double, 6>, 3> B, P, L;
+public:
+	InvKinematics(double radious_base, double radious_platform, double gamma_base, double gamma_platform,
+		double h = 0.1, double actuator_min = 0, double actuator_nominal = 0, double actuator_max = 0);
+	std::tuple<std::array<std::array<double, 6>, 3>, std::array<std::array<double, 6>, 3>, double> frame();
+	std::array<std::array<double, 3>, 3> rotX(double theta);
+	std::array<std::array<double, 3>, 3> rotY(double theta);
+	std::array<std::array<double, 3>, 3> rotZ(double theta);
+	std::array<double, 6> solve(std::array<double, 3> translation = { 0, 0, 0 }, std::array<double, 3> rotation = { 0, 0, 0 });
+};
 
 
 

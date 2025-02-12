@@ -25,9 +25,6 @@
     <ClCompile Include="src\InvKinematics.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\StewartPlatform.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -42,13 +39,10 @@
     <ClInclude Include="src\InvKinematics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\StewartPlatform.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\PA12_Arduino\PA12.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\main.h">
+    <ClInclude Include="src\StewartPlatform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

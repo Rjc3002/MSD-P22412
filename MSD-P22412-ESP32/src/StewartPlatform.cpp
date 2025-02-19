@@ -20,7 +20,6 @@ int StewartPlatform::run() {
     // Set Hexapod Constants
 
     InvKinematics clf(RB,RP,GB,GP,H,Actuator_Min,Actuator_Neutral,Actuator_Max);
-    std::array<double, 6> l;
 
     // Create translation
     std::array<double, 3> trans = { dX, dY, dZ };
@@ -29,13 +28,18 @@ int StewartPlatform::run() {
     std::array<double, 3> rot1 = { dRoll, dPitch, dYaw };
 
     // Calculate Actuator lengths
-     std::array<double, 6> new_l = clf.solve(trans, rot1);
+    std::array<double, 6> new_l = clf.solve(trans, rot1);
 
-    std::cout << "Leg actuation distance (m): ";
+    std::cout << "New Leg Lengths (m): ";
     for (size_t i = 0; i < 6; ++i) {
-        std::cout << (new_l[i] - l[i]) << " ";
+        std::cout << (new_l[i]) << " ";
     }
     std::cout << std::endl;
 
     return 0;
 }
+
+int stateMachine() { return 0; }
+int actuate() { return 0; }
+int readData() { return 0; }
+int solveKinematics() { return 0; }

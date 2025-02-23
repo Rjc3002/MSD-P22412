@@ -37,27 +37,36 @@ std::array<double, 6> InvKinematics::Norm(const std::array<std::array<double, 6>
     //Frame() Function Defines geometry of Stewart Platform
     std::tuple<std::array<std::array<double, 6>, 3>, std::array<std::array<double, 6>, 3>, double> InvKinematics::frame() {
         //Base angles for each motor
-        std::array<double, 6> phi_B = { 7 * M_PI / 6 + gamma_B, 7 * M_PI / 6 - gamma_B,
-                                       M_PI / 2 + gamma_B, M_PI / 2 - gamma_B,
-                                       11 * M_PI / 6 + gamma_B, 11 * M_PI / 6 - gamma_B };
+        std::array<double, 6> phi_B = { 7.0 * M_PI / 6.0 + gamma_B, 7.0 * M_PI / 6.0 - gamma_B,
+                                       M_PI / 2.0 + gamma_B, M_PI / 2.0 - gamma_B,
+                                       11.0 * M_PI / 6.0 + gamma_B, 11.0 * M_PI / 6.0 - gamma_B };
         //Platform angles for each motor
-        std::array<double, 6> phi_P = { 3 * M_PI / 2 - gamma_P, 5 * M_PI / 6 + gamma_P,
-                                       5 * M_PI / 6 - gamma_P, M_PI / 6 + gamma_P,
-                                       M_PI / 6 - gamma_P, 3 * M_PI / 2 + gamma_P };
+        std::array<double, 6> phi_P = { 3.0 * M_PI / 2.0 - gamma_P, 5.0 * M_PI / 6.0 + gamma_P,
+                                       5.0 * M_PI / 6.0 - gamma_P, M_PI / 6.0 + gamma_P,
+                                       M_PI / 6.0 - gamma_P, 3.0 * M_PI / 2.0 + gamma_P };
         
         //Coordinates of the points where servo arms are attached
         for (int i = 0; i < 6; ++i) {
             B[0][i] = rb * cos(phi_B[i]);
             B[1][i] = rb * sin(phi_B[i]);
-            B[2][i] = 0;
+            B[2][i] = 0.0;
             P[0][i] = rp * cos(phi_P[i]);
             P[1][i] = rp * sin(phi_P[i]);
-            P[2][i] = 0;
+            P[2][i] = 0.0;
         }
 
         double Bx = B[0][0], By = B[1][0], Px = P[0][0], Py = P[1][0];
         //Height of platform
+        //Serial.println("-----");
+        //Serial.println(Bx);
+        //Serial.println(By);
+        //Serial.println(Px);
+        //Serial.println(Py);
+        //Serial.println(aNom);
+        //Serial.println("-----");
         double H = sqrt(aNom * aNom - ((Px - Bx) * (Px - Bx) + (Py - By) * (Py - By)));
+        Serial.print("Height: ");
+        Serial.println(H, 7);
         //Should check if H is -1 here
         return { B, P, H };
     }
@@ -80,7 +89,9 @@ std::array<double, 6> InvKinematics::Norm(const std::array<std::array<double, 6>
 
 
 std::array<double, 6> InvKinematics::solve(std::array<double, 3> translation, std::array<double, 3> rotation) {
+    //Serial.println("In InvKinematics solve()");
     auto [B, P, H] = this->frame();
+
     //Calculate rotation matrix: matrix multiply rotX(thetax) * ...y * ...z
     std::array<std::array<double, 3>, 3> rotMatrix = this->MatMul(this->MatMul(this->rotX(rotation[0]), this->rotY(rotation[1])), this->rotZ(rotation[2]));
     
@@ -93,6 +104,7 @@ std::array<double, 6> InvKinematics::solve(std::array<double, 3> translation, st
     for (size_t i = 0; i < 3; ++i) {
         for (size_t j = 0; j < 6; ++j) {
             l[i][j] = translation[i] + home[i];
+            //Serial.println(l[i][j]);
         }
     }
 

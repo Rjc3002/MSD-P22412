@@ -7,6 +7,7 @@
 #include <cmath>
 #include <array>
 #include <tuple>
+#include <Arduino.h>
 
 class InvKinematics {
 private:
@@ -14,7 +15,7 @@ private:
 	double aNom, aMin, aMax, height; //Actuator variables
 	std::array<std::array<double, 6>, 3> B, P, L;
 public:
-	InvKinematics(double radious_base, double radious_platform, double gamma_base, double gamma_platform,
+	InvKinematics(double radious_base = 0.05, double radious_platform = 0.02, double gamma_base = 15, double gamma_platform = 30,
 		double h = 0.1, double actuator_min = 0, double actuator_nominal = 0, double actuator_max = 0);
 
 	template <size_t N, size_t M, size_t Q>

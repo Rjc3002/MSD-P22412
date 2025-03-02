@@ -25,6 +25,7 @@ public:
 	std::array<std::array<double, 3>, 3> rotX(double theta);
 	std::array<std::array<double, 3>, 3> rotY(double theta);
 	std::array<std::array<double, 3>, 3> rotZ(double theta);
+	bool checkLengths(std::array<double, 6> lengths);
 	std::array<double, 6> solve(std::array<double, 3> translation = { 0, 0, 0 }, std::array<double, 3> rotation = { 0, 0, 0 });
 };
 

@@ -2,9 +2,9 @@
 
 
 InvKinematics::InvKinematics(double radious_base, double radious_platform, double gamma_base, double gamma_platform,
-        double h, double actuator_min, double actuator_nominal, double actuator_max)
+        double actuator_min, double actuator_nominal, double actuator_max)
         : rb(radious_base), rp(radious_platform), aNom(actuator_nominal), aMin(actuator_min), aMax(actuator_max),
-        height(h), gamma_B(gamma_base), gamma_P(gamma_platform){}
+        gamma_B(gamma_base), gamma_P(gamma_platform){}
 
 //Matrix multiplication helper function for NxM times MxP Matrixes
 template <size_t N, size_t M, size_t Q>

@@ -16,7 +16,7 @@ private:
 	std::array<std::array<double, 6>, 3> B, P, L;
 public:
 	InvKinematics(double radious_base = 0.05, double radious_platform = 0.02, double gamma_base = 15, double gamma_platform = 30,
-		double h = 0.1, double actuator_min = 0, double actuator_nominal = 0, double actuator_max = 0);
+		double actuator_min = 0, double actuator_nominal = 0, double actuator_max = 0);
 
 	template <size_t N, size_t M, size_t Q>
 	std::array<std::array<double, Q>, N> MatMul(const std::array<std::array<double, M>, N>& X, const std::array<std::array<double, Q>, M>& Y);

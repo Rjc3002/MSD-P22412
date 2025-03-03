@@ -9,11 +9,11 @@
 */
 
 StewartPlatform::StewartPlatform(double radious_base, double radious_platform, double gamma_base, double gamma_platform,
-    double h, double actuator_min, double actuator_nominal, double actuator_max, double deltaX, double deltaY, double deltaZ,
+    double actuator_min, double actuator_nominal, double actuator_max, double deltaX, double deltaY, double deltaZ,
     double deltaRoll, double deltaPitch, double deltaYaw)
     : RB(radious_base), RP(radious_platform), Actuator_Neutral(actuator_nominal), Actuator_Min(actuator_min), Actuator_Max(actuator_max),
-    H(h), dX(deltaX), dY(deltaY), dZ(deltaZ), dRoll(deltaRoll), dPitch(deltaPitch), dYaw(deltaYaw), 
-    clf(radious_base, radious_platform, gamma_base* M_PI / 180.0, gamma_platform* M_PI / 180.0, h, actuator_min, actuator_nominal, actuator_max) {
+    dX(deltaX), dY(deltaY), dZ(deltaZ), dRoll(deltaRoll), dPitch(deltaPitch), dYaw(deltaYaw), 
+    clf(radious_base, radious_platform, gamma_base* M_PI / 180.0, gamma_platform* M_PI / 180.0, actuator_min, actuator_nominal, actuator_max) {
     GB = gamma_base * M_PI / 180.0;
     GP = gamma_platform * M_PI / 180.0;
 }

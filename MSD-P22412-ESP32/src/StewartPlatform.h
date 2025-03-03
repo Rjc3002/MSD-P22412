@@ -16,7 +16,7 @@
 class StewartPlatform {
 private:
 	double RB, RP, GB, GP;			 //Platform variables
-	double Actuator_Neutral, Actuator_Min, Actuator_Max, H; //Actuator variables
+	double Actuator_Neutral, Actuator_Min, Actuator_Max; //Actuator variables
 	double dX, dY, dZ, dRoll, dPitch, dYaw; //Operation variables
 	std::array<std::array<double, 6>, 3> B, P, L;
 	InvKinematics clf;
@@ -24,7 +24,7 @@ private:
 	bool running = true;
 public:
 	StewartPlatform(double radious_base, double radious_platform, double gamma_base, double gamma_platform,
-		double h, double actuator_min = 0, double actuator_nominal = 0.006, double actuator_max = 0.012,
+		double actuator_min = 0, double actuator_nominal = 0.006, double actuator_max = 0.012,
 		double deltaX = 0, double deltaY = 0, double deltaZ = 0,
 		double deltaRoll = 0, double deltaPitch = 0, double deltaYaw = 0);
 	bool startStop(bool start = true); //Access the running state machine variable
@@ -33,7 +33,7 @@ public:
 	int stateMachine();//State Machine Fxn -> Which uses the below functions -> Maybe just use run() for this
 	int actuate();//Move Motors Fxn (Blue Box) -> Uses stuff from motorinterface.h
 	int readData();//Parse Data Fxn (Green Box) -> Uses stuff from inputparser.h
-	int solveKinematics();//Calculate Kinematics Fxn (Purple Box) -> Uses stuff from invkinematics.h
+	int solveKinematics();//Calculate Kinematics Fxn (Purple Box) -> Uses stuff from invkinematics.h and motorinterface.h
 };
 
 #endif /* STEWARTPLATFORM_H_ */

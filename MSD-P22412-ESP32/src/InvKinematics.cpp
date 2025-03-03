@@ -2,9 +2,9 @@
 
 
 InvKinematics::InvKinematics(double radious_base, double radious_platform, double gamma_base, double gamma_platform,
-        double h, double actuator_min, double actuator_nominal, double actuator_max)
+        double actuator_min, double actuator_nominal, double actuator_max)
         : rb(radious_base), rp(radious_platform), aNom(actuator_nominal), aMin(actuator_min), aMax(actuator_max),
-        height(h), gamma_B(gamma_base), gamma_P(gamma_platform){}
+        gamma_B(gamma_base), gamma_P(gamma_platform){}
 
 //Matrix multiplication helper function for NxM times MxP Matrixes
 template <size_t N, size_t M, size_t Q>
@@ -45,7 +45,7 @@ std::array<double, 6> InvKinematics::Norm(const std::array<std::array<double, 6>
                                        5.0 * M_PI / 6.0 - gamma_P, M_PI / 6.0 + gamma_P,
                                        M_PI / 6.0 - gamma_P, 3.0 * M_PI / 2.0 + gamma_P };
         
-        //Coordinates of the points where servo arms are attached
+		//Frames of the points where servo arms are attached on Base [B] and Platform [P]
         for (int i = 0; i < 6; ++i) {
             B[0][i] = rb * cos(phi_B[i]);
             B[1][i] = rb * sin(phi_B[i]);
@@ -55,6 +55,7 @@ std::array<double, 6> InvKinematics::Norm(const std::array<std::array<double, 6>
             P[2][i] = 0.0;
         }
 
+		//Take one frame from the base and platform to calculate the height of the platform
         double Bx = B[0][0], By = B[1][0], Px = P[0][0], Py = P[1][0];
         //Height of platform
         //Serial.println("-----");
@@ -87,15 +88,25 @@ std::array<double, 6> InvKinematics::Norm(const std::array<std::array<double, 6>
         return { {{cos(theta), -sin(theta), 0}, {sin(theta), cos(theta), 0}, {0, 0, 1}} };
     }
 
+	//Check if the lengths of the legs are within the range of the actuators
+	bool InvKinematics::checkLengths(std::array<double, 6> lengths) {
+		for (size_t i = 0; i < 6; ++i) {
+			if (lengths[i] < aMin || lengths[i] > aMax) {
+				return false;
+			}
+		}
+		return true;
+	}
 
 std::array<double, 6> InvKinematics::solve(std::array<double, 3> translation, std::array<double, 3> rotation) {
     //Serial.println("In InvKinematics solve()");
+
+	//Get base mounting frames, platform mounting frames, and height of platform
     auto [B, P, H] = this->frame();
 
-    //Calculate rotation matrix: matrix multiply rotX(thetax) * ...y * ...z
+    //Calculate total rotation matrix: matrix multiply rotX(thetax) * ...y * ...z
     std::array<std::array<double, 3>, 3> rotMatrix = this->MatMul(this->MatMul(this->rotX(rotation[0]), this->rotY(rotation[1])), this->rotZ(rotation[2]));
     
-    //Calculate leg length by applying transformations (see notes)
     std::array<std::array<double, 6>, 3> l = {};
     std::array<double, 3> home = { 0.0, 0.0, H };
 

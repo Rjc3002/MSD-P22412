@@ -22,6 +22,15 @@ private:
 	InvKinematics clf;
 
 	bool running = true;
+
+	static constexpr int UNINITIALIZED = -9999;
+	static constexpr double originPathThreshold = 2.0; //(deg)
+	static constexpr double motorDisplacementThreshold = 0.02; //(m)
+	static constexpr double angularResoltion = 0.1; //(deg)
+
+	double lastThetaR = UNINITIALIZED;
+	double lastThetaP = UNINITIALIZED;
+
 public:
 	StewartPlatform(double radious_base, double radious_platform, double gamma_base, double gamma_platform,
 		double actuator_min = 0, double actuator_nominal = 0.006, double actuator_max = 0.012,
@@ -31,9 +40,10 @@ public:
 	int run(); //Setup and Start State Machine
 	std::array<double, 6> getRotationLengths(double dr, double dp, bool solve = false, double dyaw = 0, double dx = 0, double dy = 0, double dz = 0); //Set translation and rotation frames, then optionally solve for leg lengths
 	int stateMachine();//State Machine Fxn -> Which uses the below functions -> Maybe just use run() for this
-	int actuate();//Move Motors Fxn (Blue Box) -> Uses stuff from motorinterface.h
+	int actuate();//Move Motors Fxn (Blue Box) -> Uses stuff from motorinterface.h, update lastThetaR and lastThetaP, run home() if needed?
 	int readData();//Parse Data Fxn (Green Box) -> Uses stuff from inputparser.h
-	int solveKinematics();//Calculate Kinematics Fxn (Purple Box) -> Uses stuff from invkinematics.h and motorinterface.h
+	int solveKinematics(double thetaR, double thetaP);//Calculate Kinematics Fxn (Purple Box) -> Uses stuff from invkinematics.h and motorinterface.h
+	int home();
 };
 
 #endif /* STEWARTPLATFORM_H_ */

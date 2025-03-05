@@ -60,7 +60,7 @@ int StewartPlatform::run() {
             }
             Serial.println();
 
-            if (solveKinematics()) {
+            if (solveKinematics(dRoll, dPitch)) {
                 actuate();
             }
 
@@ -91,4 +91,122 @@ std::array<double, 6> StewartPlatform::getRotationLengths(double dr, double dp, 
 int StewartPlatform::stateMachine() { return 0; }
 int StewartPlatform::actuate() { return 0; }
 int StewartPlatform::readData() { return 0; }
-int StewartPlatform::solveKinematics() { return 0; }
+
+
+int StewartPlatform::solveKinematics(double thetaR, double thetaP) 
+{ 
+    int error = 0;
+    
+    bool throughOrigin = false;
+    bool motorDispOutOfBounds = false;
+
+	if (lastThetaR == UNINITIALIZED || lastThetaP == UNINITIALIZED) {
+        error = -2;
+        return 0;
+	}
+
+    double initialThetaR = lastThetaR;
+    double initialThetaP = lastThetaP;
+    double goalThetaR, goalThetaP;
+
+    do {
+        if (throughOrigin) { //On second path
+            throughOrigin = false;
+            initialThetaP = 0.0;
+            initialThetaR = 0.0;
+            goalThetaP = thetaP;
+            goalThetaR = thetaR;
+        }
+        else { //First path, is a second path needed?
+            //check and set throughOrigin
+			if ((abs(thetaP-initialThetaP) < originPathThreshold || abs(thetaR-initialThetaR) < originPathThreshold)
+                && ((thetaP * initialThetaP) < 0.0 || (thetaR * initialThetaR) < 0.0)) {
+				throughOrigin = true;
+			}
+            if (throughOrigin) {
+                goalThetaP = 0.0;
+                goalThetaR = 0.0;
+            }
+            else {
+                goalThetaP = thetaP;
+                goalThetaR = thetaR;
+            }
+        }
+        //Calculate initial N
+        double N = max(abs(goalThetaR - initialThetaR) / angularResoltion, abs(goalThetaP - initialThetaP) / angularResoltion);
+
+        bool solvingN = true;
+        do {
+            //For each step
+            for (size_t i = 0; i < N; ++i) {
+                //Solve inverse kinematics for point on path
+				double thetaI_P = clf.calculatePointOnPath(N, initialThetaP, goalThetaP, i);
+				double thetaI_R = clf.calculatePointOnPath(N, initialThetaR, goalThetaR, i);
+
+                double lastStepThetaR = 0.0;
+                double lastStepThetaP = 0.0;
+
+				if (i == 0) {
+					lastStepThetaR = initialThetaR;
+					lastStepThetaP = initialThetaP;
+                }
+                else {
+					lastStepThetaR = clf.calculatePointOnPath(N, initialThetaR, goalThetaR, i - 1);
+					lastStepThetaP = clf.calculatePointOnPath(N, initialThetaP, goalThetaP, i - 1);
+                }
+
+				std::array<double, 6> legLengths = getRotationLengths(thetaI_R, thetaI_P, true);
+                std::array<double, 6> lastLengths = getRotationLengths(lastStepThetaR, lastStepThetaP, true);
+
+                //Check if actuator lengths are valid
+                if (clf.checkLengths(legLengths)) {
+                    solvingN = false;
+                    throughOrigin = false;
+                    error = -1;
+                    break;
+                }
+                //Calculate and check change in actuator lengths
+				for (size_t j = 0; j < 6; ++j) {
+					if (abs(legLengths[j] - lastLengths[j]) > motorDisplacementThreshold) { //Check that actuator lengths are less than the threshold displacement
+						motorDispOutOfBounds = true;
+						break;
+					}
+				}
+                
+                if (motorDispOutOfBounds) { //If not, increase N and jump to top of loop
+                    N++;
+					motorDispOutOfBounds = false;
+                    //clear and resize cmd array for this path only
+
+                    break;
+                }
+
+                //Store actuator lengths in command array for this path
+
+
+                if (i == N - 1) {
+                    solvingN = false; //End of path
+                }
+            }
+        } while (solvingN);
+    } while (throughOrigin); //Do the second path if neccessary
+
+    //Error handling
+
+    return 0; //Return full command array (both cmd arrays appended)
+}
+
+int StewartPlatform::home() { 
+    //Measure current actuator lengths
+
+	//Compare to home lengths using inv kinematics
+
+    //Calculate optimal N
+
+    //Linear stepping of motors
+
+
+    //lastTheta values should only be updated in the motor moving cmds
+
+	return 0; //return command array
+}

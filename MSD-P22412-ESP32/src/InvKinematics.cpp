@@ -98,6 +98,19 @@ std::array<double, 6> InvKinematics::Norm(const std::array<std::array<double, 6>
 		return true;
 	}
 
+
+    double InvKinematics::calculatePointOnPath(double steps, double thetaInitial, double thetaFinal, int point) {
+        double theta = 0.0;
+        double A, B = 0.0;
+
+        A = -2 * (thetaFinal - thetaInitial) / (steps * steps * steps);
+        B = 3 * (thetaFinal - thetaInitial) / (steps * steps);
+
+		theta = A * point * point * point + B * point * point + thetaInitial;
+
+        return theta;
+    }
+
 std::array<double, 6> InvKinematics::solve(std::array<double, 3> translation, std::array<double, 3> rotation) {
     //Serial.println("In InvKinematics solve()");
 

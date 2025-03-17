@@ -26,7 +26,7 @@ public:
 	std::array<std::array<double, 3>, 3> rotY(double theta);
 	std::array<std::array<double, 3>, 3> rotZ(double theta);
 	bool checkLengths(std::array<double, 6> lengths);
-	double calculatePointOnPath(double steps, double thetaInitial, double thetaFinal, int point);
+	double calculatePointOnPath(int steps, double thetaInitial, double thetaFinal, int point);
 	std::array<double, 6> solve(std::array<double, 3> translation = { 0, 0, 0 }, std::array<double, 3> rotation = { 0, 0, 0 });
 };
 

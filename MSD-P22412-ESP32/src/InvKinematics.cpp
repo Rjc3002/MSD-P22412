@@ -99,12 +99,12 @@ std::array<double, 6> InvKinematics::Norm(const std::array<std::array<double, 6>
 	}
 
 
-    double InvKinematics::calculatePointOnPath(double steps, double thetaInitial, double thetaFinal, int point) {
+    double InvKinematics::calculatePointOnPath(int steps, double thetaInitial, double thetaFinal, int point) {
         double theta = 0.0;
         double A, B = 0.0;
 
-        A = -2 * (thetaFinal - thetaInitial) / (steps * steps * steps);
-        B = 3 * (thetaFinal - thetaInitial) / (steps * steps);
+        A = -2 * (thetaFinal - thetaInitial) / double(steps * steps * steps);
+        B = 3 * (thetaFinal - thetaInitial) / double(steps * steps);
 
 		theta = A * point * point * point + B * point * point + thetaInitial;
 

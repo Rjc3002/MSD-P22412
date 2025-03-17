@@ -8,8 +8,8 @@
 #include "src\StewartPlatform.h"
 
 // Define Linear Actuator Specifications
-double Actuator_Stroke = 0.012; //(m)
-double Actuator_Neutral = 0.0822; //(m)
+double Actuator_Stroke = 0.010; //(m)
+double Actuator_Neutral = 0.082165; //(m)
 double Actuator_Min = Actuator_Neutral - (Actuator_Stroke / 2.0); 
 double Actuator_Max = Actuator_Neutral + (Actuator_Stroke / 2.0);
 double RB = 0.050;

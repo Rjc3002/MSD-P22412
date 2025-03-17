@@ -43,7 +43,7 @@ public:
 	int actuate();//Move Motors Fxn (Blue Box) -> Uses stuff from motorinterface.h, update lastThetaR and lastThetaP, run home() if needed?
 	int readData();//Parse Data Fxn (Green Box) -> Uses stuff from inputparser.h
 	std::vector<std::array<double, 6>> solveKinematics(double thetaR, double thetaP);//Calculate Kinematics Fxn (Purple Box) -> Uses stuff from invkinematics.h and motorinterface.h
-	int home();
+	std::vector<std::array<double, 6>> home();
 };
 
 #endif /* STEWARTPLATFORM_H_ */

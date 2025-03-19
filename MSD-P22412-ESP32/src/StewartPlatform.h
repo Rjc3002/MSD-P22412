@@ -25,7 +25,7 @@ private:
 
 	static constexpr int UNINITIALIZED = -9999;
 	static constexpr double originPathThreshold = 2.0; //(deg)
-	static constexpr double motorDisplacementThreshold = 0.02; //(m)
+	static constexpr double motorDisplacementThreshold = 0.0002; //(m)
 	static constexpr double angularResoltion = 0.1; //(deg)
 
 	double lastThetaR = UNINITIALIZED;

@@ -26,7 +26,19 @@ bool StewartPlatform::startStop(bool start) {
 int StewartPlatform::run() {
     startStop(true); //Start state machine
     while (running) { //State Machine begins here
-        readData();
+        //Home Motors
+        Serial.println("Homing Motors");
+		auto homeCmdArray = home();
+        if (!homeCmdArray.empty()) {
+            setup();
+            actuate(homeCmdArray);
+        }
+        Serial.println("Homing Complete");
+
+        lastThetaR = 0.0;
+		lastThetaP = 0.0;
+
+        //readData();
 
         //temporary demo code UI:
         double targetRoll, targetPitch = 0;
@@ -36,7 +48,7 @@ int StewartPlatform::run() {
         while (!Serial.available()) {} //Wait for numbers to be entered
         targetRoll = Serial.parseFloat();
         targetPitch = Serial.parseFloat();
-        //if (targetRoll != 0 && targetPitch != 0) { // Check if the input was successful
+        if (targetRoll != 0 && targetPitch != 0) { // Check if the input was successful
             Serial.print("You entered: Roll=");
             Serial.print(targetRoll, 2);
             Serial.print(" deg, Pitch=");
@@ -45,15 +57,15 @@ int StewartPlatform::run() {
             inputSuccess = true;
             dRoll = targetRoll;
             dPitch = targetPitch;
-       // }
-       // else {
-            //Serial.println("Issue parsing input");
-        //}
+        }
+        else {
+            Serial.println("Issue parsing input");
+        }
         //
         //Set motion and calculate leg lengths
         std::array<double, 6> new_l = getRotationLengths(dRoll, dPitch, true);
-        //if (inputSuccess && std::all_of(new_l.begin(), new_l.end(), [](double val) { return val != 0;})) { //Make sure new_l is not {0}
-            Serial.print("New Leg Lengths (m): ");
+        if (inputSuccess && std::all_of(new_l.begin(), new_l.end(), [](double val) { return val != 0;})) { //Make sure new_l is not {0}
+            Serial.print("New Leg Lengths will be: (m): ");
             for (size_t i = 0; i < 6; i++) {
                 Serial.print(new_l[i],12);
                 Serial.print(", ");
@@ -63,13 +75,18 @@ int StewartPlatform::run() {
             auto cmdArray = solveKinematics(dRoll, dPitch);
 
             if (!cmdArray.empty()) {
-                actuate();
-            }
+                actuate(cmdArray);
+			}
+			else {
+				Serial.println("Error creating command array. Restart everything :)");
+			}
 
-        //}
-
-
-
+            lastThetaR = dRoll;
+            lastThetaP = dPitch;
+        }
+        else {
+            Serial.println("Error calculating new leg lengths. Restart everything :)");
+        }
     }
     return 0;
 }
@@ -91,7 +108,7 @@ std::array<double, 6> StewartPlatform::getRotationLengths(double dr, double dp, 
 }
 
 int StewartPlatform::stateMachine() { return 0; }
-int StewartPlatform::actuate() { return 0; }
+//int StewartPlatform::actuate() { return 0; }
 int StewartPlatform::readData() { return 0; }
 
 
@@ -189,6 +206,10 @@ std::vector<std::array<double, 6>> StewartPlatform::solveKinematics(double theta
                         break;
                     }
 
+                    for (size_t j = 0; j < 6; j++) {
+						legLengths[j] = legLengths[j] - Actuator_Neutral; //Convert to delta lengths
+					}
+
                     //Store actuator lengths in command array for this path
 					result.push_back(legLengths);
 
@@ -215,7 +236,7 @@ std::vector<std::array<double, 6>> StewartPlatform::solveKinematics(double theta
 std::vector<std::array<double, 6>> StewartPlatform::home() {
     std::vector<std::array<double, 6>> result;
     std::array<double, 6> goalLengths = getRotationLengths(0, 0, true);
-	std::array<double, 6> currentLengths = getRotationLengths(0, 0, true); //Read current lengths from motors
+    std::array<double, 6> currentLengths = readPos(); //Read current lengths from motors
     std::array<double, 6> stepLengths = { 0.0 };
 
     int maxN = 0;

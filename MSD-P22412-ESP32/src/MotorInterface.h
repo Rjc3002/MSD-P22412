@@ -31,6 +31,7 @@ public:
 	void actuate(const std::vector<std::array<double, 6>> cmdArray);
 	void move(int* moveArr);
 	std::array<double, 6> readPos();
+	void testSmth(int test);
 
 };
 

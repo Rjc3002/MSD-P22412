@@ -54,6 +54,10 @@ public:
 	virtual ~PA12();
 
 	/////////// Device control methods /////////////
+
+	//Custom Functions
+	syncWrite(int write_addr, int* param, int param_length);
+
 	void begin(int buad);
 	int  ping(int  bID);
 	int readRaw(void);

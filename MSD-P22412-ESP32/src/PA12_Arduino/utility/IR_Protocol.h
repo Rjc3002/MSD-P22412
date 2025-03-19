@@ -39,9 +39,9 @@ void irpInterrupt2(byte data);
 void irpInterrupt3(byte data);
 */
 unsigned long irp_get_baudrate(int baudnum);
-//unsigned short update_crc_ir(unsigned short crc_accum, unsigned char *data_blk_ptr, unsigned short data_blk_size); 
+unsigned short update_crc_ir(unsigned short crc_accum, unsigned char *data_blk_ptr, unsigned short data_blk_size); 
 
-void PrintBuffer(uint8_t *bpPrintBuffer, uint8_t bLength);
+//void PrintBuffer(uint8_t *bpPrintBuffer, uint8_t bLength);
 
 #ifdef __cplusplus
 }

@@ -31,7 +31,7 @@ int StewartPlatform::run() {
 		auto homeCmdArray = home();
         if (!homeCmdArray.empty()) {
             setup();
-            actuate(homeCmdArray);
+            motors.actuate(homeCmdArray);
         }
         Serial.println("Homing Complete");
 
@@ -75,7 +75,7 @@ int StewartPlatform::run() {
             auto cmdArray = solveKinematics(dRoll, dPitch);
 
             if (!cmdArray.empty()) {
-                actuate(cmdArray);
+                motors.actuate(cmdArray);
 			}
 			else {
 				Serial.println("Error creating command array. Restart everything :)");
@@ -108,7 +108,7 @@ std::array<double, 6> StewartPlatform::getRotationLengths(double dr, double dp, 
 }
 
 int StewartPlatform::stateMachine() { return 0; }
-//int StewartPlatform::actuate() { return 0; }
+
 int StewartPlatform::readData() { return 0; }
 
 
@@ -236,7 +236,7 @@ std::vector<std::array<double, 6>> StewartPlatform::solveKinematics(double theta
 std::vector<std::array<double, 6>> StewartPlatform::home() {
     std::vector<std::array<double, 6>> result;
     std::array<double, 6> goalLengths = getRotationLengths(0, 0, true);
-    std::array<double, 6> currentLengths = readPos(); //Read current lengths from motors
+    std::array<double, 6> currentLengths = motors.readPos(); //Read current lengths from motors
     std::array<double, 6> stepLengths = { 0.0 };
 
     int maxN = 0;

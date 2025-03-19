@@ -6,17 +6,32 @@
 #include <cmath>
 #include <array>
 #include <Arduino.h>  // Required for Serial functions
-#include "InvKinematics.h"
-#include "InputParser.h"
 #include "PA12_Arduino/PA12.h"
-#include "StewartPlatform.h"
 #include <algorithm>
 
-extern PA12 myServo;
+class MotorInterface {
+private:
+	PA12 myServo;
 
-void setup();
-void actuate(const std::vector<std::array<double, 6>>& cmdArray);
-void move(std::array<int, 12> moveArr);
-std::array<double, 6> readPos();
+	int GOAL_POS = 0x86;
+
+	//polynomial mapping values [-221 + 98.9x + 1.43x^2] meters -> actuation value
+	double a1 = 14.5;
+	double b1 = 105;
+	double c1 = 1.43;
+
+	//actuation value -> meters
+	double a2 = -0.0366;
+	double b2 = 0.00879;
+	double c2 = -0.000000475;
+
+public:
+	MotorInterface();
+	void setup();
+	void actuate(const std::vector<std::array<double, 6>> cmdArray);
+	void move(int* moveArr);
+	std::array<double, 6> readPos();
+
+};
 
 #endif /* MOTORINTERFACE_H_ */

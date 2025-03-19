@@ -3,10 +3,7 @@
  *
  */
 
-#include "Arduino.h"
 #include "PA12.h"
-
-#include <SoftwareSerial.h>
 
 PA12::PA12(HardwareSerial  *dev_serial, int DirectionPin) {
 PA12_Serial_Type=0;
@@ -49,13 +46,13 @@ PA12::PA12(SoftwareSerial  *dev_serial, int DirectionPin,bool TxLevel) {
 PA12::~PA12() {
 	// TODO Auto-generated destructor stub
 }
-void PA12::begin(int baud){
+void PA12::begin(){
 
 	pinMode(PA12_DirPin, OUTPUT);
 	if(PA12_Serial_Type)
-	((SoftwareSerial *)PA12_Serial)->begin(irp_get_baudrate(baud));
+	((SoftwareSerial *)PA12_Serial)->begin(57600);
 	else
-	((HardwareSerial *)PA12_Serial)->begin(irp_get_baudrate(baud));
+	((HardwareSerial *)PA12_Serial)->begin(57600);
 	/*
 	 while (!(*PA12_Serial)) {
 		 ; // wait for serial port to connect. Needed for native USB port only

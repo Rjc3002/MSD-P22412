@@ -19,25 +19,34 @@ StewartPlatform::StewartPlatform(double radious_base, double radious_platform, d
 }
 
 bool StewartPlatform::startStop(bool start) {
+    Serial.print("Press 1 to start, 0 to stop: ");
+    while (!Serial.available()) {} //Wait for numbers to be entered
+    int input = Serial.parseInt();
+	if (input != 0) {
+		start = true;
+	}
+	else {
+		start = false;
+	}
     running = start;
+    Serial.println("Starting");
     return running;
 }
 
 int StewartPlatform::run() {
     startStop(true); //Start state machine
+    //Home Motors
+    Serial.println("Homing Motors");
+    auto homeCmdArray = home();
+    if (!homeCmdArray.empty()) {
+        setup();
+        motors.actuate(homeCmdArray);
+    }
+    Serial.println("Homing Complete");
+
+    lastThetaR = 0.0;
+    lastThetaP = 0.0;
     while (running) { //State Machine begins here
-        //Home Motors
-        Serial.println("Homing Motors");
-		auto homeCmdArray = home();
-        if (!homeCmdArray.empty()) {
-            setup();
-            actuate(homeCmdArray);
-        }
-        Serial.println("Homing Complete");
-
-        lastThetaR = 0.0;
-		lastThetaP = 0.0;
-
         //readData();
 
         //temporary demo code UI:
@@ -48,7 +57,14 @@ int StewartPlatform::run() {
         while (!Serial.available()) {} //Wait for numbers to be entered
         targetRoll = Serial.parseFloat();
         targetPitch = Serial.parseFloat();
-        if (targetRoll != 0 && targetPitch != 0) { // Check if the input was successful
+		if (targetRoll == -42) {
+			Serial.print("Running Special Tests. Enter Test #: ");
+			while (!Serial.available()) {} //Wait for numbers to be entered
+			int test = Serial.parseInt();
+			motors.testSmth(test);
+			Serial.println("Test Complete");
+		}
+        else if (targetRoll != 0 && targetPitch != 0) { // Check if the input was successful
             Serial.print("You entered: Roll=");
             Serial.print(targetRoll, 2);
             Serial.print(" deg, Pitch=");
@@ -59,7 +75,16 @@ int StewartPlatform::run() {
             dPitch = targetPitch;
         }
         else {
-            Serial.println("Issue parsing input");
+            Serial.println("Homing Motors");
+            auto homeCmdArray = home();
+            if (!homeCmdArray.empty()) {
+                setup();
+                motors.actuate(homeCmdArray);
+            }
+            Serial.println("Homing Complete");
+
+            lastThetaR = 0.0;
+            lastThetaP = 0.0;
         }
         //
         //Set motion and calculate leg lengths
@@ -75,7 +100,7 @@ int StewartPlatform::run() {
             auto cmdArray = solveKinematics(dRoll, dPitch);
 
             if (!cmdArray.empty()) {
-                actuate(cmdArray);
+                motors.actuate(cmdArray);
 			}
 			else {
 				Serial.println("Error creating command array. Restart everything :)");
@@ -108,7 +133,7 @@ std::array<double, 6> StewartPlatform::getRotationLengths(double dr, double dp, 
 }
 
 int StewartPlatform::stateMachine() { return 0; }
-//int StewartPlatform::actuate() { return 0; }
+
 int StewartPlatform::readData() { return 0; }
 
 
@@ -136,12 +161,14 @@ std::vector<std::array<double, 6>> StewartPlatform::solveKinematics(double theta
                 initialThetaR = 0.0;
                 goalThetaP = thetaP;
                 goalThetaR = thetaR;
+                Serial.println("Solving Path, On second path now");
             }
             else { //First path, is a second path needed?
                 //check and set throughOrigin
                 if ((abs(thetaP - initialThetaP) < originPathThreshold || abs(thetaR - initialThetaR) < originPathThreshold)
                     && ((thetaP * initialThetaP) < 0.0 || (thetaR * initialThetaR) < 0.0)) {
                     throughOrigin = true;
+                    Serial.println("Solving Path, will need to go through Origin");
                 }
                 if (throughOrigin) {
                     goalThetaP = 0.0;
@@ -160,6 +187,8 @@ std::vector<std::array<double, 6>> StewartPlatform::solveKinematics(double theta
 
             bool solvingN = true;
             do {
+                Serial.print("Solving Path, Test N: ");
+				Serial.println(N);
                 //For each step
                 for (size_t i = 0; i < N; i++) {
                     //Solve inverse kinematics for point on path
@@ -206,8 +235,11 @@ std::vector<std::array<double, 6>> StewartPlatform::solveKinematics(double theta
                         break;
                     }
 
+					Serial.print("Solving Path, Step-Leg Lengths: ");
                     for (size_t j = 0; j < 6; j++) {
-						legLengths[j] = legLengths[j] - Actuator_Neutral; //Convert to delta lengths
+						legLengths[j] = legLengths[j] - Actuator_Min; //Convert to delta lengths
+						Serial.print(legLengths[j], 12);
+						Serial.print(", ");
 					}
 
                     //Store actuator lengths in command array for this path
@@ -236,8 +268,26 @@ std::vector<std::array<double, 6>> StewartPlatform::solveKinematics(double theta
 std::vector<std::array<double, 6>> StewartPlatform::home() {
     std::vector<std::array<double, 6>> result;
     std::array<double, 6> goalLengths = getRotationLengths(0, 0, true);
-    std::array<double, 6> currentLengths = readPos(); //Read current lengths from motors
+    std::array<double, 6> currentLengths = motors.readPos(); //Read current lengths from motors
+
+    for (size_t j = 0; j < 6; j++) {
+        currentLengths[j] = currentLengths[j] + Actuator_Min; //Convert to total lengths
+    }
+   
     std::array<double, 6> stepLengths = { 0.0 };
+
+    Serial.println("Homing, Current Lengths: ");
+	for (size_t i = 0; i < 6; i++) {
+		Serial.print(currentLengths[i], 12);
+		Serial.print(", ");
+	}
+    Serial.println();
+    Serial.println("Homing, Goal Lengths: ");
+    for (size_t i = 0; i < 6; i++) {
+        Serial.print(goalLengths[i], 12);
+        Serial.print(", ");
+    }
+    Serial.println();
 
     int maxN = 0;
 	int N = 0;
@@ -251,11 +301,13 @@ std::vector<std::array<double, 6>> StewartPlatform::home() {
 			maxN = N;
 		}
 	}
+	Serial.print("Homing, N: ");
+	Serial.println(maxN);
 
 	for (size_t i = 1; i <= maxN; i++) { //Generate command array for each step
 		for (size_t j = 0; j < 6; j++) {
 			double stepSize = (goalLengths[j] - currentLengths[j]) / double(maxN);
-			stepLengths[j] = currentLengths[j] + i*stepSize;
+			stepLengths[j] = currentLengths[j] + i*stepSize - Actuator_Min;
 		}
 		result.push_back(stepLengths);
     }

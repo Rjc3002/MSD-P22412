@@ -4,7 +4,7 @@
  Author:	rylan
 */
 
-
+//#include <SoftwareSerial.h>
 #include "src\StewartPlatform.h"
 
 // Define Linear Actuator Specifications

@@ -25,7 +25,7 @@ private:
 
 	static constexpr int UNINITIALIZED = -9999;
 	static constexpr double originPathThreshold = 2.0; //(deg)
-	static constexpr double motorDisplacementThreshold = 0.02; //(m)
+	static constexpr double motorDisplacementThreshold = 0.0002; //(m)
 	static constexpr double angularResoltion = 0.1; //(deg)
 
 	double lastThetaR = UNINITIALIZED;
@@ -43,7 +43,7 @@ public:
 //	int actuate();//Move Motors Fxn (Blue Box) -> Uses stuff from motorinterface.h, update lastThetaR and lastThetaP, run home() if needed?
 	int readData();//Parse Data Fxn (Green Box) -> Uses stuff from inputparser.h
 	std::vector<std::array<double, 6>> solveKinematics(double thetaR, double thetaP);//Calculate Kinematics Fxn (Purple Box) -> Uses stuff from invkinematics.h and motorinterface.h
-	int home();
+	std::vector<std::array<double, 6>> home();
 };
 
 #endif /* STEWARTPLATFORM_H_ */

@@ -63,7 +63,8 @@ int StewartPlatform::run() {
             auto cmdArray = solveKinematics(dRoll, dPitch);
 
             if (!cmdArray.empty()) {
-                actuate();
+                setup();
+                actuate(cmdArray);
             }
 
         //}
@@ -91,7 +92,7 @@ std::array<double, 6> StewartPlatform::getRotationLengths(double dr, double dp, 
 }
 
 int StewartPlatform::stateMachine() { return 0; }
-int StewartPlatform::actuate() { return 0; }
+//int StewartPlatform::actuate() { return 0; }
 int StewartPlatform::readData() { return 0; }
 
 

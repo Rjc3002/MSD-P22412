@@ -61,9 +61,16 @@ void MotorInterface::actuate(const std::vector<std::array<double, 6>> cmdArray) 
 }
 
 void MotorInterface::move(int* moveArr) {
-	Serial.println("syncWrite");
-	myServo.syncWrite(GOAL_POS, moveArr, 12);
-	delay(200);		//Need to experiment with delay or use the myServo.moving command
+	Serial.println("GoalWrite");
+	//myServo.syncWrite(GOAL_POS, moveArr, 12);
+
+	for (int i = 0; i < 6; i++) {
+		myServo.goalPosition(i + 1, moveArr[2 * i + 1]);
+		delay(10);
+	}
+
+
+	delay(100);		//Need to experiment with delay or use the myServo.moving command
 }
 
 /*
@@ -71,17 +78,22 @@ reads the current positions of each of the actuators and returns an array of the
 */
 std::array<double, 6> MotorInterface::readPos() {
 	std::array<double, 6> positions = { 0.0 };
-
+	Serial.print("Reading Positions: ");
 	for (int i = 0; i < 6; i++) {
-		double pos = myServo.presentPosition(i + 1);
+		double pos = myServo.quick_presentPosition(i + 1);
+		delay(20);
+		pos = myServo.quick_presentPosition(i + 1);
+		Serial.print(pos);
+		Serial.print(", ");
 		positions[i] = (a2 + b2 * pos + (c2 * std::pow(pos, 2)))/1000.0;
 		delay(200);
 	}
+	Serial.println();
 
 	return positions;
 }
 
-void MotorInterface::testSmth(int test) {
+void MotorInterface::testSmth(int test, int param) {
 	if (test == 1) {
 		Serial.println("Test 1: SyncWrite 1200");
 		for (int i = 0; i < 6; i++) {
@@ -95,6 +107,17 @@ void MotorInterface::testSmth(int test) {
 			myServo.forceEnable(i + 1, 0); //Enable active force on motors.
 			delay(10);
 		}
+	}
+	else if (test == 2) {
+		Serial.println("Test 2: Indv Motor Control to 1200");
+		myServo.forceEnable(param, 0x01); //Enable active force on motors.
+		delay(10);
+
+		myServo.writeint(param, 0x86, 1200);
+
+		delay(200);
+		myServo.forceEnable(param, 0); //Enable active force on motors.
+		delay(10);
 	}
 	else {
 		

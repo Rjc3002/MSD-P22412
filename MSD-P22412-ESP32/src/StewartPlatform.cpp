@@ -35,33 +35,36 @@ bool StewartPlatform::startStop(bool start) {
 
 int StewartPlatform::run() {
     startStop(true); //Start state machine
+    setup();
+    delay(500);
     //Home Motors
     Serial.println("Homing Motors");
     auto homeCmdArray = home();
     if (!homeCmdArray.empty()) {
-        setup();
         motors.actuate(homeCmdArray);
     }
     Serial.println("Homing Complete");
 
     lastThetaR = 0.0;
     lastThetaP = 0.0;
+
     while (running) { //State Machine begins here
         //readData();
-
         //temporary demo code UI:
         double targetRoll, targetPitch = 0;
         bool inputSuccess = false;
+        delay(1000);
         Serial.println("Enter the desired goal Roll angle (degs.) and desired goal Pitch angle (degs.), then press enter: ");
         Serial.println("For example:  5 15");
         while (!Serial.available()) {} //Wait for numbers to be entered
         targetRoll = Serial.parseFloat();
         targetPitch = Serial.parseFloat();
 		if (targetRoll == -42) {
-			Serial.print("Running Special Tests. Enter Test #: ");
+			Serial.print("Running Special Tests. Enter Test # and param: ");
 			while (!Serial.available()) {} //Wait for numbers to be entered
 			int test = Serial.parseInt();
-			motors.testSmth(test);
+			int param = Serial.parseInt();
+			motors.testSmth(test, param);
 			Serial.println("Test Complete");
 		}
         else if (targetRoll != 0 && targetPitch != 0) { // Check if the input was successful
@@ -75,7 +78,7 @@ int StewartPlatform::run() {
             dPitch = targetPitch;
         }
         else {
-            Serial.println("Homing Motors");
+            Serial.println("Received Command for Homing Motors");
             auto homeCmdArray = home();
             if (!homeCmdArray.empty()) {
                 setup();
@@ -112,6 +115,7 @@ int StewartPlatform::run() {
         else {
             Serial.println("Error calculating new leg lengths. Restart everything :)");
         }
+        Serial.flush();
     }
     return 0;
 }

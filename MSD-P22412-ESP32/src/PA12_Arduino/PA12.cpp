@@ -3,10 +3,7 @@
  *
  */
 
-#include "Arduino.h"
 #include "PA12.h"
-
-#include <SoftwareSerial.h>
 
 PA12::PA12(HardwareSerial  *dev_serial, int DirectionPin) {
 PA12_Serial_Type=0;
@@ -49,13 +46,13 @@ PA12::PA12(SoftwareSerial  *dev_serial, int DirectionPin,bool TxLevel) {
 PA12::~PA12() {
 	// TODO Auto-generated destructor stub
 }
-void PA12::begin(int baud){
+void PA12::begin(){
 
 	pinMode(PA12_DirPin, OUTPUT);
 	if(PA12_Serial_Type)
-	((SoftwareSerial *)PA12_Serial)->begin(irp_get_baudrate(baud));
+	((SoftwareSerial *)PA12_Serial)->begin(57600);
 	else
-	((HardwareSerial *)PA12_Serial)->begin(irp_get_baudrate(baud));
+	((HardwareSerial *)PA12_Serial)->begin(57600);
 	/*
 	 while (!(*PA12_Serial)) {
 		 ; // wait for serial port to connect. Needed for native USB port only
@@ -659,6 +656,29 @@ int PA12::setPosition(int bID, int Position, int Speed){
 	return (this->txRxPacket(bID, CMD_WRITE, param_length));
 
 }
+
+//Custom syncWrite function 
+int PA12::syncWrite(int write_addr, int* param, int param_length) {
+	//param=(int)[ID,Data,ID,Data,...]
+	//Each Data = 0x0000XXXX
+	const int BROADCAST_ID = 0xFE; //Broadcast 254
+	const int COMMAND = 0x73;  //SyncWrite CMD_SYNC_WRITE
+	int numActuators = param_length / 2;
+	// Clear the parameter buffer
+	this->clearBuffer();
+	// Add start address and number of actuators
+	mParamBuffer[0] = write_addr;   //Register to store data in
+	mParamBuffer[1] = numActuators; // Number of actuators
+	// Copy parameter data (ID, data1, data2, ...)
+	for (int i = 0; i < numActuators; i++) {
+		mParamBuffer[2 + (3 * i)] = param[2 * i]; //ID
+		mParamBuffer[2 + (3 * i) + 1] = IRP_LOBYTE(param[(2 * i) + 1]);//(int)(Data&0xff);
+		mParamBuffer[2 + (3 * i) + 2] = IRP_HIBYTE(param[(2 * i) + 1]);//(int)((Data>>8)&0xff);
+	}
+	// Transmit the packet
+	return this->txRxPacket(BROADCAST_ID, COMMAND, param_length + 2);
+}
+
 #if 0
 int PA12::bulkRead(int *param, int param_length){
 	//mResult = 0;

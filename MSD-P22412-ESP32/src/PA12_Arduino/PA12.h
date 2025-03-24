@@ -4,9 +4,11 @@
  *      Author: Progressive Automations
  */
 
+#pragma once
 #ifndef PA12_H_
 #define PA12_H_
 
+#include "Arduino.h"
 #include "utility/IR_Protocol.h"
 #include "HardwareSerial.h"
 #include <SoftwareSerial.h>
@@ -54,7 +56,11 @@ public:
 	virtual ~PA12();
 
 	/////////// Device control methods /////////////
-	void begin(int buad);
+
+	//Custom Functions
+	int syncWrite(int write_addr, int* param, int param_length);
+
+	void begin(); //Baud = 57600
 	int  ping(int  bID);
 	int readRaw(void);
 	int available(void);
@@ -77,7 +83,6 @@ public:
 	//unsigned long readDint( int bID, int wAddress );
 
 	int setPosition(int bID, int Position, int Speed);
-	int syncWrite(int start_addr, int data_length, int *param, int param_length); // int(16bit) syncwrite() for IRP
 
 	/////// Methods for making a packet ////////
 	void setTxPacketId( int id );

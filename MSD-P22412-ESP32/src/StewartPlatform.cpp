@@ -36,6 +36,7 @@ bool StewartPlatform::startStop(bool start) {
 int StewartPlatform::run() {
     startStop(true); //Start state machine
     setup();
+    motors.setup();
     delay(500);
     //Home Motors
     Serial.println("Homing Motors");
@@ -67,7 +68,7 @@ int StewartPlatform::run() {
 			motors.testSmth(test, param);
 			Serial.println("Test Complete");
 		}
-        else if (targetRoll != 0 && targetPitch != 0) { // Check if the input was successful
+        else if (targetRoll != 0 || targetPitch != 0) { // Check if the input was successful
             Serial.print("You entered: Roll=");
             Serial.print(targetRoll, 2);
             Serial.print(" deg, Pitch=");
@@ -122,7 +123,6 @@ int StewartPlatform::run() {
 
 std::array<double, 6> StewartPlatform::getRotationLengths(double dr, double dp, bool solve, double dyaw, double dx, double dy, double dz ) {
     // Create translation
-    //Serial.println("In getRotationLengths()");
     std::array<double, 3> trans = { dx, dy, dz };
 
     // Create Rotation

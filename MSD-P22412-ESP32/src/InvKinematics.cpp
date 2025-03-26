@@ -57,18 +57,10 @@ std::array<double, 6> InvKinematics::Norm(const std::array<std::array<double, 6>
 
 		//Take one frame from the base and platform to calculate the height of the platform
         double Bx = B[0][0], By = B[1][0], Px = P[0][0], Py = P[1][0];
-        //Height of platform
-        //Serial.println("-----");
-        //Serial.println(Bx);
-        //Serial.println(By);
-        //Serial.println(Px);
-        //Serial.println(Py);
-        //Serial.println(aNom);
-        //Serial.println("-----");
         double H = sqrt(aNom * aNom - ((Px - Bx) * (Px - Bx) + (Py - By) * (Py - By)));
-        Serial.print("Height: ");
-        Serial.println(H, 7);
-        //Should check if H is -1 here
+        //Serial.print("Height: ");
+        //Serial.println(H, 7);
+   
         return { B, P, H };
     }
 
@@ -112,8 +104,6 @@ std::array<double, 6> InvKinematics::Norm(const std::array<std::array<double, 6>
     }
 
 std::array<double, 6> InvKinematics::solve(std::array<double, 3> translation, std::array<double, 3> rotation) {
-    //Serial.println("In InvKinematics solve()");
-
 	//Get base mounting frames, platform mounting frames, and height of platform
     auto [B, P, H] = this->frame();
 
@@ -128,7 +118,6 @@ std::array<double, 6> InvKinematics::solve(std::array<double, 3> translation, st
     for (size_t i = 0; i < 3; ++i) {
         for (size_t j = 0; j < 6; ++j) {
             l[i][j] = translation[i] + home[i];
-            //Serial.println(l[i][j]);
         }
     }
 
@@ -145,6 +134,5 @@ std::array<double, 6> InvKinematics::solve(std::array<double, 3> translation, st
     // magnitude of l  = sqrt(lx^2 + ly^2 + lz^2)
     std::array<double, 6> lll = Norm(l);
 
-    //std::cout << "Calculated height: " << H << std::endl;
     return lll;
 }

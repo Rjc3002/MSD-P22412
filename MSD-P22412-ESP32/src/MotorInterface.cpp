@@ -6,8 +6,15 @@ MotorInterface::MotorInterface():myServo(&Serial0, 8, 1) { //myServo(&Serial, en
 
 void MotorInterface::setup() {
 	//Initialize the PA12 bus
-	// Baudrate -> 32: 57600 (hardcoded in PA12.cpp)
+	// Baudrate = 57600 (hardcoded in PA12.cpp)
+	Serial.println("Setting up Motor Interface");
 	myServo.begin();
+
+	for (int i = 0; i < 6; i++) {
+		myServo.movingSpeed(i + 1, 0); //moving speed of 0 is max speed
+		delay(10);
+	}
+	
 }
 
 
@@ -18,15 +25,6 @@ each step is a list of goal positions for actuator IDs in order {ID#1 goalpos, I
 */
 
 void MotorInterface::actuate(const std::vector<std::array<double, 6>> cmdArray) {
-	setup();
-
-	Serial.println("Setting Speeds");
-	for (int i = 0; i < 6; i++) {
-		//myServo.movingSpeed(i + 1, 0); //moving speed of 0 is max speed
-		//delay(10);
-		// set any other parameters here
-	}
-
 	Serial.println("Executing Commands");
 	for (int i = 0; i < 6; i++) {
 		myServo.forceEnable(i + 1, 0x01); //Enable active force on motors.
@@ -62,15 +60,13 @@ void MotorInterface::actuate(const std::vector<std::array<double, 6>> cmdArray) 
 
 void MotorInterface::move(int* moveArr) {
 	Serial.println("GoalWrite");
-	//myServo.syncWrite(GOAL_POS, moveArr, 12);
 
 	for (int i = 0; i < 6; i++) {
 		myServo.goalPosition(i + 1, moveArr[2 * i + 1]);
 		delay(10);
 	}
 
-
-	delay(100);		//Need to experiment with delay or use the myServo.moving command
+	delay(50);		//Need to experiment with delay or use the myServo.moving command
 }
 
 /*
@@ -95,31 +91,12 @@ std::array<double, 6> MotorInterface::readPos() {
 
 void MotorInterface::testSmth(int test, int param) {
 	if (test == 1) {
-		Serial.println("Test 1: SyncWrite 1200");
-		for (int i = 0; i < 6; i++) {
-			myServo.forceEnable(i + 1, 0x01); //Enable active force on motors.
-			delay(10);
-		}
-		int moveArr[12] = { 1, 1200, 2, 1200, 3, 1200, 4, 1200, 5, 1200, 6, 1200 };
-		myServo.syncWrite(GOAL_POS, moveArr, 12);
-		delay(200);
-		for (int i = 0; i < 6; i++) {
-			myServo.forceEnable(i + 1, 0); //Enable active force on motors.
-			delay(10);
-		}
+		Serial.println("Test 1 not implemented");
 	}
 	else if (test == 2) {
-		Serial.println("Test 2: Indv Motor Control to 1200");
-		myServo.forceEnable(param, 0x01); //Enable active force on motors.
-		delay(10);
-
-		myServo.writeint(param, 0x86, 1200);
-
-		delay(200);
-		myServo.forceEnable(param, 0); //Enable active force on motors.
-		delay(10);
+		Serial.println("Test 2 not implemented");
 	}
 	else {
-		
+		Serial.println("Unknown Test number. Restart.");
 	}
 }

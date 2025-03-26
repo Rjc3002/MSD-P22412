@@ -16,14 +16,14 @@ private:
 	int GOAL_POS = 0x86;
 
 	//polynomial mapping values [-221 + 98.9x + 1.43x^2] meters -> actuation value
-	double a1 = 14.5;
-	double b1 = 105;
-	double c1 = 1.43;
+	double a1 = 7.16;
+	double b1 = 138;
+	double c1 = -0.0708;
 
 	//actuation value -> meters
-	double a2 = -0.0366;
-	double b2 = 0.00879;
-	double c2 = -0.000000475;
+	double a2 = -0.0509;
+	double b2 = 0.00723;
+	double c2 = 0.0000000278;
 
 public:
 	MotorInterface();
@@ -31,7 +31,7 @@ public:
 	void actuate(const std::vector<std::array<double, 6>> cmdArray);
 	void move(int* moveArr);
 	std::array<double, 6> readPos();
-	void testSmth(int test);
+	void testSmth(int test, int param);
 
 };
 

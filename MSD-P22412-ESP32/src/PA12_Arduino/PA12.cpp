@@ -657,7 +657,7 @@ int PA12::setPosition(int bID, int Position, int Speed){
 
 }
 
-//Custom syncWrite function 
+//Custom syncWrite function (Doesn't seem to work!!)
 int PA12::syncWrite(int write_addr, int* param, int param_length) {
 	//param=(int)[ID,Data,ID,Data,...]
 	//Each Data = 0x0000XXXX

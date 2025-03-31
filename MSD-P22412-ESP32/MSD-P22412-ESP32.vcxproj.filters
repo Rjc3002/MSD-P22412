@@ -57,5 +57,8 @@
     <ClInclude Include="src\MotorInterface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="timerISR.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

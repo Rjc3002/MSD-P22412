@@ -29,18 +29,18 @@ double dPitch = 0;
 double dYaw = 0; // Twist, unused
 
 //Create Stewart Platform object
-StewartPlatform splat(RB, RP, GB, GP, Actuator_Min, Actuator_Neutral, Actuator_Max);
+StewartPlatform& splat = StewartPlatform::initialize(RB, RP, GB, GP, Actuator_Min, Actuator_Neutral, Actuator_Max);
 
 // the setup function runs once when you press reset or power the board
 void setup() {
-	Serial.begin(115200);
+	Serial.begin(9600);
 	//while (!Serial);  // Wait for Serial Monitor to open
 	Serial.println("Starting.");
 }
 
 // the loop function runs over and over again until power down or reset
 void loop() {
-	splat.run(); //Start State Machine
+	splat.stateMachine(); //Start State Machine
 
 	exit; //Should never reach this
 }

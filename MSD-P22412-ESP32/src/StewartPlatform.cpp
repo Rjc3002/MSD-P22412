@@ -16,6 +16,68 @@ StewartPlatform::StewartPlatform(double radious_base, double radious_platform, d
     clf(radious_base, radious_platform, gamma_base* M_PI / 180.0, gamma_platform* M_PI / 180.0, actuator_min, actuator_nominal, actuator_max) {
     GB = gamma_base * M_PI / 180.0;
     GP = gamma_platform * M_PI / 180.0;
+
+    setupTimer();
+}
+
+StewartPlatform& StewartPlatform::initialize(double radious_base, double radious_platform, double gamma_base, double gamma_platform,
+    double actuator_min, double actuator_nominal, double actuator_max,
+    double deltaX, double deltaY, double deltaZ,
+    double deltaRoll, double deltaPitch, double deltaYaw) {
+    std::lock_guard<std::mutex> lock(mutex);
+    if (!instance) {
+        instance = std::unique_ptr<StewartPlatform>(new StewartPlatform(radious_base, radious_platform, gamma_base, gamma_platform,
+            actuator_min, actuator_nominal, actuator_max, deltaX, deltaY, deltaZ, deltaRoll, deltaPitch, deltaYaw));
+    }
+    return *instance;
+}
+
+int StewartPlatform::stateMachine() {
+    startStop(true); //Start state machine
+    motors.setup();
+    delay(500);
+    //Home Motors
+    Serial.println("Homing Motors");
+    auto homeCmdArray = home();
+    if (!homeCmdArray.empty()) {
+        motors.actuate(homeCmdArray);
+    }
+    Serial.println("Homing Complete");
+
+    lastThetaR = 0.0;
+    lastThetaP = 0.0;
+
+    std::vector<std::array<double, 3>> inputVector;
+
+    while (running) { //State Machine begins here
+
+        //read data
+        if (Serial.available() > 0) {
+			auto tempVector = readData();
+            inputVector.insert(inputVector.end(), tempVector.begin(), tempVector.end());
+		}
+
+        if (xSemaphoreTake(timerSemaphore, 0) == pdTRUE) { //Timer has gone off, time to move to next pos
+			std::array<double, 3> goalPos = inputVector.front(); //Access and remove the next element
+			inputVector.erase(inputVector.begin());
+
+
+        }
+		
+
+        //run and wait in loops (timers?)
+        //     //Updade dpitch and droll as lists. state machine to execute and wait the desired times.
+
+    //Start, input is list of positions and times
+    //Set motion and calculate leg lengths, iterate over list, move to position, and wait for time.
+        //parse return info
+
+
+        //Check if want to stop?
+        //Repeat or end
+
+    }
+
 }
 
 bool StewartPlatform::startStop(bool start) {
@@ -33,92 +95,36 @@ bool StewartPlatform::startStop(bool start) {
     return running;
 }
 
-int StewartPlatform::run() {
-    startStop(true); //Start state machine
-    setup();
-    motors.setup();
-    delay(500);
-    //Home Motors
-    Serial.println("Homing Motors");
-    auto homeCmdArray = home();
-    if (!homeCmdArray.empty()) {
-        motors.actuate(homeCmdArray);
-    }
-    Serial.println("Homing Complete");
+int StewartPlatform::run(double goalPitch, double goalRoll) {
 
-    lastThetaR = 0.0;
-    lastThetaP = 0.0;
+    std::array<double, 6> new_l = getRotationLengths(goalRoll, goalPitch, true);
+    if (std::all_of(new_l.begin(), new_l.end(), [](double val) { return val != 0;})) { //Make sure new_l is not {0}
+        Serial.print("New Leg Lengths will be: (m): ");
+        for (size_t i = 0; i < 6; i++) {
+            Serial.print(new_l[i],12);
+            Serial.print(", ");
+        }
+        Serial.println();
 
-    while (running) { //State Machine begins here
-        //readData();
-        //temporary demo code UI:
-        double targetRoll, targetPitch = 0;
-        bool inputSuccess = false;
-        delay(1000);
-        Serial.println("Enter the desired goal Roll angle (degs.) and desired goal Pitch angle (degs.), then press enter: ");
-        Serial.println("For example:  5 15");
-        while (!Serial.available()) {} //Wait for numbers to be entered
-        targetRoll = Serial.parseFloat();
-        targetPitch = Serial.parseFloat();
-		if (targetRoll == -42) {
-			Serial.print("Running Special Tests. Enter Test # and param: ");
-			while (!Serial.available()) {} //Wait for numbers to be entered
-			int test = Serial.parseInt();
-			int param = Serial.parseInt();
-			motors.testSmth(test, param);
-			Serial.println("Test Complete");
+        auto cmdArray = solveKinematics(goalRoll, goalPitch);
+
+        if (!cmdArray.empty()) {
+            motors.actuate(cmdArray);
 		}
-        else if (targetRoll != 0 || targetPitch != 0) { // Check if the input was successful
-            Serial.print("You entered: Roll=");
-            Serial.print(targetRoll, 2);
-            Serial.print(" deg, Pitch=");
-            Serial.print(targetPitch, 2);
-            Serial.println(" deg");
-            inputSuccess = true;
-            dRoll = targetRoll;
-            dPitch = targetPitch;
-        }
-        else {
-            Serial.println("Received Command for Homing Motors");
-            auto homeCmdArray = home();
-            if (!homeCmdArray.empty()) {
-                setup();
-                motors.actuate(homeCmdArray);
-            }
-            Serial.println("Homing Complete");
+		else {
+			Serial.println("Error creating command array. Restart everything :)");
+			return 1; //Error
+		}
 
-            lastThetaR = 0.0;
-            lastThetaP = 0.0;
-        }
-        //
-        //Set motion and calculate leg lengths
-        std::array<double, 6> new_l = getRotationLengths(dRoll, dPitch, true);
-        if (inputSuccess && std::all_of(new_l.begin(), new_l.end(), [](double val) { return val != 0;})) { //Make sure new_l is not {0}
-            Serial.print("New Leg Lengths will be: (m): ");
-            for (size_t i = 0; i < 6; i++) {
-                Serial.print(new_l[i],12);
-                Serial.print(", ");
-            }
-            Serial.println();
-
-            auto cmdArray = solveKinematics(dRoll, dPitch);
-
-            if (!cmdArray.empty()) {
-                motors.actuate(cmdArray);
-			}
-			else {
-				Serial.println("Error creating command array. Restart everything :)");
-			}
-
-            lastThetaR = dRoll;
-            lastThetaP = dPitch;
-        }
-        else {
-            Serial.println("Error calculating new leg lengths. Restart everything :)");
-        }
-        Serial.flush();
+        lastThetaR = goalRoll;
+        lastThetaP = goalPitch;
     }
-    return 0;
+    else {
+        Serial.println("Some other error occurred :)");
+        return 1; //Error
+    }
+ 
+    return 0; //Success
 }
 
 std::array<double, 6> StewartPlatform::getRotationLengths(double dr, double dp, bool solve, double dyaw, double dx, double dy, double dz ) {
@@ -136,10 +142,43 @@ std::array<double, 6> StewartPlatform::getRotationLengths(double dr, double dp, 
     return { 0 };
 }
 
-int StewartPlatform::stateMachine() { return 0; }
+std::vector<std::array<double, 3>> StewartPlatform::readData() {
+	std::vector<std::array<double, 3>> input;
 
-int StewartPlatform::readData() { return 0; }
+    while (Serial.available() > 0) {  // Check if data is available to read
+        String data = Serial.readStringUntil('\n');  // Read data until newline character
+        data.trim();  // Remove leading and trailing whitespaces
 
+        // Send the response back
+        Serial.print("Recieved: "); 
+        Serial.println(data);
+
+        std::array<double, 3> values = { 0.0, 0.0, 0.0 }; // Array to store parsed values
+
+        // Parse input using sscanf
+        int count = sscanf(data.c_str(), "%lf %lf %lf", &values[0], &values[1], &values[2]);
+
+        if (count == 3) {
+            Serial.print("Parsed values: ");
+            Serial.print(values[0], 6); Serial.print(", ");
+            Serial.print(values[1], 6); Serial.print(", ");
+            Serial.println(values[2], 6);
+
+            //Check that each value is between -10 and 10
+			if (values[0] < -10 || values[0] > 10 || values[1] < -10 || values[1] > 10 || values[2] < -10 || values[2] > 10) {
+				Serial.println("Invalid input. Please enter three numbers between -10 and 10.");
+			}
+            else {
+                input.push_back(values); // Add parsed values to the input array
+            }
+        }
+        else {
+            Serial.println("Invalid input. Please enter three space-separated numbers.");
+        }
+    }
+
+    return input; //Return array.
+}
 
 std::vector<std::array<double, 6>> StewartPlatform::solveKinematics(double thetaR, double thetaP)
 { 

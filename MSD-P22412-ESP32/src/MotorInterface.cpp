@@ -11,6 +11,8 @@ void MotorInterface::setup() {
 	myServo.begin();
 
 	for (int i = 0; i < 6; i++) {
+		myServo.complianceMargin(i+1, Short, 1);
+		myServo.complianceMargin(i+1, Long, 1);
 		myServo.movingSpeed(i + 1, 0); //moving speed of 0 is max speed
 		delay(10);
 	}

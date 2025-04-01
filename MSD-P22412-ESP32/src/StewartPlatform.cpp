@@ -61,20 +61,13 @@ int StewartPlatform::stateMachine() {
 			std::array<double, 3> goalPos = inputVector.front(); //Access and remove the next element
 			inputVector.erase(inputVector.begin());
 
+			run(goalPos[1], goalPos[0]); //Run the next position
+            // Set alarm to call onTimer function after specified wait time (value in microseconds).
+            timerAlarmWrite(timer, goalPos[2]*1000000, false);
 
+            // Start timer
+            timerAlarmEnable(timer);
         }
-		
-
-        //run and wait in loops (timers?)
-        //     //Updade dpitch and droll as lists. state machine to execute and wait the desired times.
-
-    //Start, input is list of positions and times
-    //Set motion and calculate leg lengths, iterate over list, move to position, and wait for time.
-        //parse return info
-
-
-        //Check if want to stop?
-        //Repeat or end
 
     }
 

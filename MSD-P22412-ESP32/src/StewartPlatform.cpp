@@ -16,8 +16,6 @@ StewartPlatform::StewartPlatform(double radious_base, double radious_platform, d
     clf(radious_base, radious_platform, gamma_base* M_PI / 180.0, gamma_platform* M_PI / 180.0, actuator_min, actuator_nominal, actuator_max) {
     GB = gamma_base * M_PI / 180.0;
     GP = gamma_platform * M_PI / 180.0;
-
-    setupTimer();
 }
 
 StewartPlatform& StewartPlatform::initialize(double radious_base, double radious_platform, double gamma_base, double gamma_platform,
@@ -55,18 +53,34 @@ int StewartPlatform::stateMachine() {
         if (Serial.available() > 0) {
 			auto tempVector = readData();
             inputVector.insert(inputVector.end(), tempVector.begin(), tempVector.end());
+
+			if (timer == NULL) { //Timer is stopped
+                //Restart timer
+                setupTimer();
+                timerAlarmWrite(timer, 500000, false);
+                timerAlarmEnable(timer);
+			}
 		}
 
-        if (xSemaphoreTake(timerSemaphore, 0) == pdTRUE) { //Timer has gone off, time to move to next pos
-			std::array<double, 3> goalPos = inputVector.front(); //Access and remove the next element
-			inputVector.erase(inputVector.begin());
+		if (!inputVector.empty()) { //If there are positions to move to
+			if (xSemaphoreTake(timerSemaphore, 0) == pdTRUE) { //Timer has gone off, time to move to next pos
+                std::array<double, 3> goalPos = inputVector.front(); //Access and remove the next element
+                inputVector.erase(inputVector.begin());
 
-			run(goalPos[1], goalPos[0]); //Run the next position
-            // Set alarm to call onTimer function after specified wait time (value in microseconds).
-            timerAlarmWrite(timer, goalPos[2]*1000000, false);
+                run(goalPos[1], goalPos[0]); //Run the next position
+                // Set alarm to call onTimer function after specified wait time (value in microseconds).
+                timerAlarmWrite(timer, goalPos[2] * 1000000, false);
 
-            // Start timer
-            timerAlarmEnable(timer);
+                // Start timer
+                timerAlarmEnable(timer);
+			}
+        }
+        else { //No positions to move to
+            // Stop and free timer
+            if (timer) {
+                timerEnd(timer);
+                timer = NULL;
+            }
         }
 
     }

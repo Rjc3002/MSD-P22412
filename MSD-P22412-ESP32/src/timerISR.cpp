@@ -1,8 +1,4 @@
-#pragma once
-#ifndef TIMERISR_H_
-#define TIMERISR_H_
-
-#include <Arduino.h>
+#include "timerISR.h"
 
 hw_timer_t* timer = NULL;
 // Create semaphore to inform us when the timer has fired
@@ -18,5 +14,3 @@ void setupTimer() {
 	timer = timerBegin(0, 80, true);
 	timerAttachInterrupt(timer, &onTimer, true);
 }
-
-#endif /* TIMERISR_H_ */

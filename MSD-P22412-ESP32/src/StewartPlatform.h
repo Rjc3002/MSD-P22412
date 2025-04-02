@@ -65,8 +65,4 @@ public:
 	std::vector<std::array<double, 6>> home();
 };
 
-// Define static members
-std::unique_ptr<StewartPlatform> StewartPlatform::instance = nullptr;
-std::mutex StewartPlatform::mutex;
-
 #endif /* STEWARTPLATFORM_H_ */

@@ -8,6 +8,10 @@
     - The platform can only rotate in the x, y, z axis roll, pitch, yaw.
 */
 
+// Define static members
+std::unique_ptr<StewartPlatform> StewartPlatform::instance = nullptr;
+std::mutex StewartPlatform::mutex;
+
 StewartPlatform::StewartPlatform(double radious_base, double radious_platform, double gamma_base, double gamma_platform,
     double actuator_min, double actuator_nominal, double actuator_max, double deltaX, double deltaY, double deltaZ,
     double deltaRoll, double deltaPitch, double deltaYaw)

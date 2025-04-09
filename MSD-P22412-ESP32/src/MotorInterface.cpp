@@ -13,7 +13,7 @@ void MotorInterface::setup() {
 	for (int i = 0; i < 6; i++) {
 		//myServo.complianceMargin(i+1, Short, 1);
 		//myServo.complianceMargin(i+1, Long, 1);
-		//myServo.movingSpeed(i + 1, 0); //Max speed
+		myServo.movingSpeed(i + 1, 1023); //Max speed
 		myServo.BaudRate(i + 1, 32);
 		delay(10);
 	}

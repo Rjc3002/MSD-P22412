@@ -102,7 +102,7 @@ int StewartPlatform::stateMachine() {
 			}
         }
         else { //No positions to move to
-            Serial.println("No position available : (");
+            //Serial.println("No position available : (");
             // Stop and free timer
             if (timer) {
                 Serial.println("Freeing timer");
@@ -110,7 +110,7 @@ int StewartPlatform::stateMachine() {
                 timer = NULL;
             }
         }
-        Serial.println("Looping...");
+        //Serial.println("Looping...");
         delay(2);
     }
 

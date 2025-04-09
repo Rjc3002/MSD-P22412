@@ -33,7 +33,7 @@ StewartPlatform& splat = StewartPlatform::initialize(RB, RP, GB, GP, Actuator_Mi
 
 // the setup function runs once when you press reset or power the board
 void setup() {
-	Serial.begin(9600);
+	Serial.begin(115200);
 	//while (!Serial);  // Wait for Serial Monitor to open
 	Serial.println("Starting.");
 }

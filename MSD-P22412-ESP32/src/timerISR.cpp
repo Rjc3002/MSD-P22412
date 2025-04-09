@@ -6,6 +6,7 @@ volatile SemaphoreHandle_t timerSemaphore;
 
 void ARDUINO_ISR_ATTR onTimer() {
 	// Give a semaphore that we can check in the state machine
+	Serial.println("In ISR");
 	xSemaphoreGiveFromISR(timerSemaphore, NULL);
 }
 

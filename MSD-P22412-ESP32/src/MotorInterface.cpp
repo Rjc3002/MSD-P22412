@@ -11,9 +11,10 @@ void MotorInterface::setup() {
 	myServo.begin();
 
 	for (int i = 0; i < 6; i++) {
-		myServo.complianceMargin(i+1, Short, 1);
-		myServo.complianceMargin(i+1, Long, 1);
-		myServo.movingSpeed(i + 1, 0); //moving speed of 0 is max speed
+		//myServo.complianceMargin(i+1, Short, 1);
+		//myServo.complianceMargin(i+1, Long, 1);
+		//myServo.movingSpeed(i + 1, 0); //Max speed
+		myServo.BaudRate(i + 1, 32);
 		delay(10);
 	}
 	
@@ -29,6 +30,11 @@ each step is a list of goal positions for actuator IDs in order {ID#1 goalpos, I
 void MotorInterface::actuate(const std::vector<std::array<double, 6>> cmdArray) {
 	Serial.println("Executing Commands");
 	for (int i = 0; i < 6; i++) {
+		int temp = myServo.movingSpeed(i + 1);
+		Serial.print("Motor ");
+		Serial.print(i + 1);
+		Serial.print(" speed: ");
+		Serial.println(temp);
 		myServo.forceEnable(i + 1, 0x01); //Enable active force on motors.
 		delay(10);
 	}

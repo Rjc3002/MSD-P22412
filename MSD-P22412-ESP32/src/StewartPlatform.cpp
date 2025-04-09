@@ -35,6 +35,12 @@ StewartPlatform& StewartPlatform::initialize(double radious_base, double radious
 }
 
 int StewartPlatform::stateMachine() {
+    if (timer) {
+        Serial.println("Freeing timer");
+        timerEnd(timer);
+        timer = NULL;
+    }
+
     startStop(true); //Start state machine
     motors.setup();
     delay(500);
@@ -59,6 +65,7 @@ int StewartPlatform::stateMachine() {
             inputVector.insert(inputVector.end(), tempVector.begin(), tempVector.end());
 
 			if (timer == NULL) { //Timer is stopped
+                Serial.println("Restarting Timer");
                 //Restart timer
                 setupTimer();
                 timerAlarmWrite(timer, 500000, false);
@@ -67,26 +74,44 @@ int StewartPlatform::stateMachine() {
 		}
 
 		if (!inputVector.empty()) { //If there are positions to move to
+            Serial.println("There's a position available! : )");
 			if (xSemaphoreTake(timerSemaphore, 0) == pdTRUE) { //Timer has gone off, time to move to next pos
+                Serial.println("Timer went off!! : ))");
+                if (timer) {
+                    Serial.println("Freeing timer");
+                    timerEnd(timer);
+                    timer = NULL;
+                }
                 std::array<double, 3> goalPos = inputVector.front(); //Access and remove the next element
                 inputVector.erase(inputVector.begin());
 
                 run(goalPos[1], goalPos[0]); //Run the next position
+
+                if (timer == NULL) { //Timer is stopped
+                    Serial.println("Restarting Timer");
+                    //Restart timer
+                    setupTimer();
+                }
+
                 // Set alarm to call onTimer function after specified wait time (value in microseconds).
                 timerAlarmWrite(timer, goalPos[2] * 1000000, false);
 
                 // Start timer
                 timerAlarmEnable(timer);
+                Serial.println("Timer started, returning to loop");
 			}
         }
         else { //No positions to move to
+            Serial.println("No position available : (");
             // Stop and free timer
             if (timer) {
+                Serial.println("Freeing timer");
                 timerEnd(timer);
                 timer = NULL;
             }
         }
-
+        Serial.println("Looping...");
+        delay(2);
     }
 
 }

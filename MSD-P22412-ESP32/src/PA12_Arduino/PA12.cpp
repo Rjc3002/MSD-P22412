@@ -379,8 +379,12 @@ int PA12::txRxPacket(int bID, int bInst, int bTxParaLen){
 
 
 		if(bRxLenEx){
-			if(SmartDelayFlag == 1)
-				delay(150);
+			if (SmartDelayFlag == 1) {
+				//delay(150);
+				for (byte i = 0; i < 150; i++) {
+					delayMicroseconds(1000);
+				}
+			}
 			/**************************************   Receive packet  ***************************************************/
 			mRxLength = this->rxPacket(bRxLenEx);
 

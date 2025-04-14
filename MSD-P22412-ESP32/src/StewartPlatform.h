@@ -16,6 +16,7 @@
 #include "InputParser.h"
 #include "PA12_Arduino/PA12.h"
 #include "timerISR.h"
+#include "Delay.h"
 
 class StewartPlatform {
 private:

@@ -8,6 +8,7 @@
 #include <Arduino.h>  // Required for Serial functions
 #include "PA12_Arduino/PA12.h"
 #include <algorithm>
+#include "Delay.h"
 
 class MotorInterface {
 private:

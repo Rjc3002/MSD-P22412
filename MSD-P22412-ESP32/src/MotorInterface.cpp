@@ -15,7 +15,8 @@ void MotorInterface::setup() {
 		//myServo.complianceMargin(i+1, Long, 1);
 		myServo.movingSpeed(i + 1, 1023); //Max speed
 		myServo.BaudRate(i + 1, 32);
-		delay(10);
+		//delay(10);
+		ntDelay(10);
 	}
 	
 }
@@ -36,7 +37,8 @@ void MotorInterface::actuate(const std::vector<std::array<double, 6>> cmdArray) 
 		Serial.print(" speed: ");
 		Serial.println(temp);
 		myServo.forceEnable(i + 1, 0x01); //Enable active force on motors.
-		delay(10);
+		//delay(10);
+		ntDelay(10);
 	}
 	for (const auto& arr : cmdArray) {
 		int num_elements = sizeof(arr) / sizeof(arr[0]);
@@ -62,7 +64,8 @@ void MotorInterface::actuate(const std::vector<std::array<double, 6>> cmdArray) 
 		myServo.forceEnable(i + 1, 0); //Disable active force on motors, use passive friction to hold pos until next movement.
 		//The servo being actively driven to hold a position for more than 30sec may cause
 		//an overload error?
-		delay(10);
+		//delay(10);
+		ntDelay(10);
 	}
 }
 
@@ -71,10 +74,12 @@ void MotorInterface::move(int* moveArr) {
 
 	for (int i = 0; i < 6; i++) {
 		myServo.goalPosition(i + 1, moveArr[2 * i + 1]);
-		delay(10);
+		//delay(10);
+		ntDelay(10);
 	}
 
-	delay(50);		//Need to experiment with delay or use the myServo.moving command
+	//delay(50);		//Need to experiment with delay or use the myServo.moving command
+	ntDelay(50);
 }
 
 /*
@@ -85,12 +90,14 @@ std::array<double, 6> MotorInterface::readPos() {
 	Serial.print("Reading Positions: ");
 	for (int i = 0; i < 6; i++) {
 		double pos = myServo.quick_presentPosition(i + 1);
-		delay(20);
+		//delay(20);
+		ntDelay(20);
 		pos = myServo.quick_presentPosition(i + 1);
 		Serial.print(pos);
 		Serial.print(", ");
 		positions[i] = (a2 + b2 * pos + (c2 * std::pow(pos, 2)))/1000.0;
-		delay(200);
+		//delay(200);
+		ntDelay(200);
 	}
 	Serial.println();
 

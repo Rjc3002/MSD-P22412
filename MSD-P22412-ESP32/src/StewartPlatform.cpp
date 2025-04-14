@@ -43,7 +43,8 @@ int StewartPlatform::stateMachine() {
 
     startStop(true); //Start state machine
     motors.setup();
-    delay(500);
+    //delay(500);
+    ntDelay(500);
     //Home Motors
     Serial.println("Homing Motors");
     auto homeCmdArray = home();
@@ -111,7 +112,8 @@ int StewartPlatform::stateMachine() {
             }
         }
         //Serial.println("Looping...");
-        delay(2);
+        //delay(2);
+        ntDelay(2);
     }
 
 }

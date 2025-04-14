@@ -13,7 +13,7 @@ void MotorInterface::setup() {
 	for (int i = 0; i < 6; i++) {
 		//myServo.complianceMargin(i+1, Short, 1);
 		//myServo.complianceMargin(i+1, Long, 1);
-		myServo.movingSpeed(i + 1, 1023); //Max speed
+		myServo.movingSpeed(i + 1, 512); //Max speed
 		myServo.BaudRate(i + 1, 32);
 		//delay(10);
 		ntDelay(10);
@@ -77,6 +77,7 @@ void MotorInterface::move(int* moveArr) {
 		//delay(10);
 		ntDelay(10);
 	}
+	Serial.println();
 
 	//delay(50);		//Need to experiment with delay or use the myServo.moving command
 	ntDelay(50);
@@ -93,9 +94,13 @@ std::array<double, 6> MotorInterface::readPos() {
 		//delay(20);
 		ntDelay(20);
 		pos = myServo.quick_presentPosition(i + 1);
+		if (pos > 4096) {
+			pos = 4096;
+		}
 		Serial.print(pos);
 		Serial.print(", ");
 		positions[i] = (a2 + b2 * pos + (c2 * std::pow(pos, 2)))/1000.0;
+		
 		//delay(200);
 		ntDelay(200);
 	}

@@ -10,8 +10,25 @@ void ARDUINO_ISR_ATTR onTimer() {
 	xSemaphoreGiveFromISR(timerSemaphore, NULL);
 }
 
-void setupTimer() {
+void setupISRFlag() {
 	timerSemaphore = xSemaphoreCreateBinary();
-	timer = timerBegin(0, 80, true);
+}
+
+void setupTimer() {
+	timer = timerBegin(2, 80, true);
 	timerAttachInterrupt(timer, &onTimer, true);
+}
+
+void stopTimer() {
+	//Serial.println("Stopping timer");
+	timerAlarmDisable(timer);
+	timerStop(timer);
+	timerWrite(timer, 0);
+}
+
+void startTimer(double delay) {
+	Serial.println("Starting timer");
+	timerAlarmWrite(timer, delay * 1000, false);
+	timerAlarmEnable(timer);
+	timerStart(timer);
 }

@@ -10,6 +10,12 @@ extern volatile SemaphoreHandle_t timerSemaphore;
 
 void ARDUINO_ISR_ATTR onTimer();
 
+void setupISRFlag();
+
 void setupTimer();
+
+void stopTimer();
+
+void startTimer(double delay);
 
 #endif /* TIMERISR_H_ */

@@ -16,6 +16,7 @@
 #include "InputParser.h"
 #include "PA12_Arduino/PA12.h"
 #include "timerISR.h"
+#include "Delay.h"
 
 class StewartPlatform {
 private:
@@ -34,7 +35,7 @@ private:
 	static constexpr int UNINITIALIZED = -9999;
 	static constexpr double originPathThreshold = 2.0; //(deg)
 	static constexpr double motorDisplacementThreshold = 0.00007; //(m) 0.0007
-	static constexpr double angularResoltion = 0.1; //(deg)
+	static constexpr double angularResoltion = 0.05; //(deg)
 
 	double lastThetaR = UNINITIALIZED;
 	double lastThetaP = UNINITIALIZED;

@@ -30,10 +30,10 @@ double dYaw = 0; // Twist, unused
 
 //Create Stewart Platform object
 StewartPlatform& splat = StewartPlatform::initialize(RB, RP, GB, GP, Actuator_Min, Actuator_Neutral, Actuator_Max);
-
+// : )
 // the setup function runs once when you press reset or power the board
 void setup() {
-	Serial.begin(9600);
+	Serial.begin(115200);
 	//while (!Serial);  // Wait for Serial Monitor to open
 	Serial.println("Starting.");
 }

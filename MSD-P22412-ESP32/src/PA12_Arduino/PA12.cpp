@@ -108,7 +108,9 @@ void PA12::clearBuffer(void){
 	while((this->available()))
 	{
 		PA12_Serial->read();
+		Serial.print(".");
 	}
+	//Serial.println();
 }
 
 void PA12::setPacketType(int type){
@@ -379,8 +381,12 @@ int PA12::txRxPacket(int bID, int bInst, int bTxParaLen){
 
 
 		if(bRxLenEx){
-			if(SmartDelayFlag == 1)
-				delay(150);
+			if (SmartDelayFlag == 1) {
+				//delay(150);
+				for (byte i = 0; i < 150; i++) {
+					delayMicroseconds(1000);
+				}
+			}
 			/**************************************   Receive packet  ***************************************************/
 			mRxLength = this->rxPacket(bRxLenEx);
 
@@ -515,7 +521,9 @@ int PA12::fast_txRxPacket(int bID, int bInst, int bTxParaLen){
 
 	while((this->available())){
 		PA12_Serial->read();
+		Serial.print(".");
 	}
+	//Serial.println();
 
 	/**************************************   Transfer packet  ***************************************************/
 	bTxLen = this->txPacket(bID, bInst, bTxParaLen);
@@ -621,7 +629,7 @@ int PA12::writeint(int bID, int bAddress, short wData){
 	mParamBuffer[2] = IRP_HIBYTE(wData);//(int)((wData>>8)&0xff);
 	param_length = 3;
 	
-	return this->txRxPacket(bID, CMD_WRITE, param_length);
+	return this->fast_txRxPacket(bID, CMD_WRITE, param_length);
 
 }
 

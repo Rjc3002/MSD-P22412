@@ -35,9 +35,15 @@ StewartPlatform& StewartPlatform::initialize(double radious_base, double radious
 }
 
 int StewartPlatform::stateMachine() {
+    setupISRFlag(); //Create semaphore for timer ISR
+    setupTimer();
+    
+
     startStop(true); //Start state machine
     motors.setup();
-    delay(500);
+    //delay(500);
+    ntDelay(500);
+
     //Home Motors
     Serial.println("Homing Motors");
     auto homeCmdArray = home();
@@ -58,37 +64,35 @@ int StewartPlatform::stateMachine() {
 			auto tempVector = readData();
             inputVector.insert(inputVector.end(), tempVector.begin(), tempVector.end());
 
-			if (timer == NULL) { //Timer is stopped
-                //Restart timer
-                setupTimer();
-                timerAlarmWrite(timer, 500000, false);
-                timerAlarmEnable(timer);
-			}
+            startTimer(500);
 		}
 
 		if (!inputVector.empty()) { //If there are positions to move to
+            //Serial.println("There's a position available! : )");
+            //Serial.println(timerRead(timer));
 			if (xSemaphoreTake(timerSemaphore, 0) == pdTRUE) { //Timer has gone off, time to move to next pos
+                Serial.println("Timer went off!! : ))");
+                stopTimer();
+
                 std::array<double, 3> goalPos = inputVector.front(); //Access and remove the next element
                 inputVector.erase(inputVector.begin());
 
                 run(goalPos[1], goalPos[0]); //Run the next position
-                // Set alarm to call onTimer function after specified wait time (value in microseconds).
-                timerAlarmWrite(timer, goalPos[2] * 1000000, false);
 
-                // Start timer
-                timerAlarmEnable(timer);
+                startTimer(goalPos[2]);
+                
+                Serial.println("Timer started, returning to loop");
 			}
         }
         else { //No positions to move to
+            //Serial.println("No position available : (");
             // Stop and free timer
-            if (timer) {
-                timerEnd(timer);
-                timer = NULL;
-            }
+            stopTimer();
         }
-
+        //Serial.println("Looping...");
+        //delay(2);
+        ntDelay(2);
     }
-
 }
 
 bool StewartPlatform::startStop(bool start) {
@@ -176,9 +180,13 @@ std::vector<std::array<double, 3>> StewartPlatform::readData() {
             Serial.println(values[2], 6);
 
             //Check that each value is between -10 and 10
-			if (values[0] < -10 || values[0] > 10 || values[1] < -10 || values[1] > 10 || values[2] < -10 || values[2] > 10) {
-				Serial.println("Invalid input. Please enter three numbers between -10 and 10.");
+			if (values[0] < -10 || values[0] > 10 || values[1] < -10 || values[1] > 10) {
+				Serial.println("Invalid input. Please enter angles between -10 and 10.");
 			}
+            else if (acos(cos(values[0] * M_PI / 180.0) * cos(values[1] * M_PI / 180.0)) > (10.1 * M_PI / 180.0)) {
+                Serial.println("Invalid input. Angles exceed 10 deg ROM.");
+                Serial.println(acos(cos(values[0] * M_PI / 180.0) * cos(values[1] * M_PI / 180.0)) *180.0/M_PI);
+            }
             else {
                 input.push_back(values); // Add parsed values to the input array
             }

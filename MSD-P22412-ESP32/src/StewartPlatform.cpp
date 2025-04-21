@@ -183,8 +183,9 @@ std::vector<std::array<double, 3>> StewartPlatform::readData() {
 			if (values[0] < -10 || values[0] > 10 || values[1] < -10 || values[1] > 10) {
 				Serial.println("Invalid input. Please enter angles between -10 and 10.");
 			}
-            else if (acos(cos(values[0] * M_PI / 180.0) * cos(values[1] * M_PI / 180.0)) > (10.0 * M_PI / 180.0)) {
+            else if (acos(cos(values[0] * M_PI / 180.0) * cos(values[1] * M_PI / 180.0)) > (10.1 * M_PI / 180.0)) {
                 Serial.println("Invalid input. Angles exceed 10 deg ROM.");
+                Serial.println(acos(cos(values[0] * M_PI / 180.0) * cos(values[1] * M_PI / 180.0)) *180.0/M_PI);
             }
             else {
                 input.push_back(values); // Add parsed values to the input array
